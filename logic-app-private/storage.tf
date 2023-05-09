@@ -8,10 +8,25 @@ resource "azurerm_storage_account" "storage" {
   public_network_access_enabled = false
 }
 
-resource "azurerm_storage_share" "fileshare" {
-    name = "logicapp"
-    storage_account_name = azurerm_storage_account.storage.name
-    quota = "5120"
+# Does NOT work when storage accounts are deployed with public access disabled, due to pre-validation attempts by Terraform to https://storage.file.core.windows.net
+# resource "azurerm_storage_share" "fileshare" {
+#     name = "logicapp"
+#     storage_account_name = azurerm_storage_account.storage.name
+#     quota = "5120"
+# }
+
+resource "azapi_resource" "storage_file_share" {
+  type      = "Microsoft.Storage/storageAccounts/fileServices/shares@2022-09-01"
+  name      = "logicapp"
+  parent_id = "${azurerm_storage_account.storage.id}/fileServices/default"
+
+  body = jsonencode({
+    properties = {
+      accessTier       = "TransactionOptimized"
+      enabledProtocols = "SMB"
+      shareQuota       = 5120
+    }
+  })
 }
 
 resource "azurerm_private_endpoint" "blobEndpoint" {

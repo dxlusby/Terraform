@@ -34,5 +34,6 @@ resource "azurerm_logic_app_standard" "logicapp" {
     vnet_route_all_enabled = true
   }
   
-  storage_account_share_name = azurerm_storage_share.fileshare.name
+  # storage_account_share_name = azurerm_storage_share.fileshare.name
+  storage_account_share_name = azapi_resource.storage_file_share.name
 }
